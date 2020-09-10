@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "mcsv.fullname" . }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "mcsv.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "mcsv.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "mcsv.selectorLabels" . | nindent 8 }}
+    spec:
+    {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      serviceAccountName: {{ include "mcsv.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+  
+      volumes:
+        - name: spring-logs
+          hostPath:
+            path: /tmp/log/spring
+            type: DirectoryOrCreate
+  
+      containers:
+        - name: app
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Chart.AppVersion }}"
+
+          volumeMounts:
+            - mountPath: /application/tmp
+              name: spring-logs
+
+          env:
+          {{- range $key, $value := .Values.properties }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+          {{- end }}
+
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.targetPort }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.service.contextPath }}/actuator/health/liveness
+              port: http
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.service.contextPath }}/actuator/health/readiness
+              port: http
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}

@@ -1,0 +1,59 @@
+
+
+namespace: {{ cookiecutter.namespace }}
+
+replicaCount: {{ cookiecutter.replica_count }}
+
+image:
+  repository: hub.co.local/co/{{ cookiecutter.mcsv }}
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+nameOverride: "{{ cookiecutter.mcsv }}"
+fullnameOverride: "{{ cookiecutter.mcsv }}"
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: {{ cookiecutter.mcsv }}-service-account
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8080
+  annotations: {
+    prometheus.io/scrape: "true",
+    prometheus.io/path: "/api/{{ cookiecutter.mcsv }}/actuator/prometheus",
+    prometheus.io/port: "8080"
+  }
+  contextPath: /api/{{ cookiecutter.mcsv }}
+
+
+resources: {}
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+
+properties:
+  spring.profiles.active: kubernetes

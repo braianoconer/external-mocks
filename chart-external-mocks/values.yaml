@@ -1,0 +1,59 @@
+
+
+namespace: default
+
+replicaCount: 1
+
+image:
+  repository: hub.co.local/co/external-mocks
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+nameOverride: "external-mocks"
+fullnameOverride: "external-mocks"
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: external-mocks-service-account
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8080
+  annotations: {
+    prometheus.io/scrape: "true",
+    prometheus.io/path: "/api/external-mocks/actuator/prometheus",
+    prometheus.io/port: "8080"
+  }
+  contextPath: /api/external-mocks
+
+
+resources: {}
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+
+properties:
+  spring.profiles.active: kubernetes

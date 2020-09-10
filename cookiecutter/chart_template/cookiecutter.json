@@ -1,0 +1,12 @@
+{
+    "project_name": "Demo",
+    "mcsv": "{{ cookiecutter.project_name.lower().replace(' ', '-') }}",
+    "chart_name": "chart-{{ cookiecutter.mcsv }}",
+    "namespace": "default",
+    "replica_count": "1",
+
+    "_copy_without_render": [
+        ".helmignore",
+        "templates"
+    ]
+}
