@@ -1,7 +1,4 @@
 
-
-namespace: default
-
 replicaCount: 1
 
 image:
@@ -56,4 +53,5 @@ affinity: {}
 
 
 properties:
+  server.port: 8080
   spring.profiles.active: kubernetes
